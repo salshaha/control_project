@@ -1,0 +1,2030 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Root Locus Quest (Game)</title>
+  <style>
+    :root{
+      --ink:#111;
+      --paper:#fbf7ea;
+      --paper2:#f4efd9;
+      --accent:#0b5;
+      --bad:#d33;
+      --good:#1a7f37;
+      --muted:#555;
+      --line:#1c1c1c;
+    }
+
+.hint-box {
+    display: none;
+    margin-top: 8px;
+    padding: 10px;
+    background-color: #f3f3f3;
+    border-left: 4px solid #4CAF50;
+    font-size: 14px;
+}
+
+.hint-btn {
+    cursor: pointer;
+    padding: 6px 10px;
+}
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      color:var(--ink);
+      background:
+        radial-gradient(circle at 20px 20px, rgba(0,0,0,0.03) 2px, transparent 3px) 0 0/60px 60px,
+        linear-gradient(0deg, rgba(0,0,0,0.04) 1px, transparent 1px) 0 0/24px 24px,
+        linear-gradient(90deg, rgba(0,0,0,0.03) 1px, transparent 1px) 0 0/24px 24px,
+        var(--paper);
+    }
+
+    header{
+      padding:16px 18px;
+      border-bottom:3px solid var(--line);
+      background:linear-gradient(180deg, var(--paper), var(--paper2));
+      position:sticky;
+      top:0;
+      z-index:10;
+    }
+    header h1{
+      margin:0;
+      font-size:20px;
+      letter-spacing:0.5px;
+    }
+    header .sub{
+      margin-top:6px;
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.4;
+    }
+
+    .wrap{
+      display:grid;
+      grid-template-columns: 320px 1fr;
+      gap:14px;
+      padding:14px;
+      max-width:1600px;
+      margin:0 auto;
+    }
+
+    .panel{
+      background:rgba(255,255,255,0.55);
+      border:3px solid var(--line);
+      border-radius:16px;
+      box-shadow: 6px 6px 0 rgba(0,0,0,0.18);
+      padding:14px;
+    }
+
+    .left .panel{position:sticky; top:90px; height: calc(100vh - 110px); overflow:auto;}
+
+    .levelList{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      margin-top:10px;
+    }
+
+    .lvlBtn{
+      text-align:left;
+      width:100%;
+      padding:10px 10px;
+      background:rgba(255,255,255,0.6);
+      border:2px dashed var(--line);
+      border-radius:14px;
+      cursor:pointer;
+      transition:transform .08s ease;
+    }
+    .lvlBtn:hover{transform:translateY(-1px)}
+    .lvlBtn.active{
+      border-style:solid;
+      background:rgba(10,180,90,0.10);
+    }
+    .lvlBtn .t{
+      font-weight:800;
+      font-size:13px;
+    }
+    .lvlBtn .d{
+      font-size:11px;
+      color:var(--muted);
+      margin-top:4px;
+      line-height:1.25;
+    }
+
+    .badge{
+      display:inline-block;
+      padding:2px 8px;
+      border:2px solid var(--line);
+      border-radius:999px;
+      font-size:11px;
+      background:rgba(255,255,255,0.65);
+      margin-left:6px;
+      vertical-align:middle;
+    }
+    .badge.good{border-color:var(--good); color:var(--good)}
+    .badge.bad{border-color:var(--bad); color:var(--bad)}
+
+    .rightTop{
+      display:flex;
+      flex-wrap:wrap;
+      align-items:center;
+      gap:10px;
+      margin-bottom:12px;
+    }
+
+    .cardTitle{
+      font-size:16px;
+      font-weight:900;
+      margin:0 0 8px;
+    }
+    .tiny{
+      font-size:11px;
+      color:var(--muted);
+      line-height:1.35;
+    }
+
+    .box{
+      border:2px dashed var(--line);
+      border-radius:14px;
+      padding:10px;
+      background:rgba(255,255,255,0.55);
+    }
+
+    input[type="text"], input[type="number"]{
+      width:100%;
+      padding:8px 10px;
+      border:2px solid var(--line);
+      border-radius:12px;
+      background:rgba(255,255,255,0.75);
+      font-family:inherit;
+      font-size:13px;
+    }
+    button{
+      padding:9px 12px;
+      border:2px solid var(--line);
+      border-radius:14px;
+      background:rgba(255,255,255,0.7);
+      cursor:pointer;
+      font-family:inherit;
+      font-weight:800;
+      transition:transform .08s ease;
+    }
+    button:hover{transform:translateY(-1px)}
+    button.primary{
+      background:rgba(10,180,90,0.18);
+    }
+    button.danger{
+      background:rgba(220,50,50,0.14);
+    }
+
+    .row{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    .row > * {flex:1}
+    .row .fit{flex:0 0 auto}
+
+    .feedback{
+      margin-top:10px;
+      padding:10px;
+      border:2px solid var(--line);
+      border-radius:14px;
+      background:rgba(255,255,255,0.65);
+      line-height:1.35;
+      font-size:12px;
+    }
+    .feedback.good{border-color:var(--good)}
+    .feedback.bad{border-color:var(--bad)}
+
+    canvas{
+      width:100%;
+      height:800px;
+      border:3px solid var(--line);
+      border-radius:16px;
+      background:rgba(255,255,255,0.45);
+      box-shadow: 6px 6px 0 rgba(0,0,0,0.16);
+    }
+
+    .hint{
+      margin-top:8px;
+      padding:8px 10px;
+      border-left:4px solid var(--line);
+      background:rgba(255,255,255,0.45);
+      border-radius:12px;
+      font-size:11px;
+      color:var(--muted);
+    }
+
+    .checkGrid{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:8px;
+      margin-top:8px;
+    }
+    label.chk{
+      display:flex;
+      gap:8px;
+      align-items:flex-start;
+      padding:8px 10px;
+      border:2px dashed var(--line);
+      border-radius:14px;
+      background:rgba(255,255,255,0.55);
+      cursor:not-allowed; /* Locked cursor */
+      opacity: 0.7;
+      user-select:none;
+      font-size:12px;
+    }
+    label.chk input{margin-top:2px}
+    /* Style for checked boxes to look "Active" */
+    label.chk input:checked + span {
+        font-weight: bold;
+        color: var(--good);
+    }
+
+    .kbar{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      margin-top:10px;
+    }
+    input[type="range"]{
+      width:100%;
+    }
+
+    .smallMono{
+      font-size:12px;
+      color:var(--muted);
+      white-space:pre-wrap;
+      line-height:1.4;
+    }
+
+    @media (max-width: 980px){
+      .wrap{grid-template-columns: 1fr}
+      .left .panel{position:relative; top:auto; height:auto;}
+      canvas{height:600px;}
+    }
+    .formula {
+      background: rgba(255,255,255,0.7);
+      border: 2px dashed #000;
+      border-radius: 14px;
+      padding: 5px;
+      margin: 8px 0;
+      font-size: 15px;
+    }
+
+  
+    .nqStart{
+      width:100%;
+      padding:10px 12px;
+      border-radius:12px;
+      border:2px solid #111;
+      background:#fff;
+      font-weight:800;
+      cursor:pointer;
+      transition: transform .05s ease;
+    }
+    .nqStart:active{ transform: scale(0.98); }
+</style>
+
+<style>
+/* ===== Sticky Next Questions Panel (added) ===== */
+#nextQuestionsPanel{
+  position: fixed;
+  right: 14px;
+  top: 110px;
+  width: 320px;
+  max-height: calc(100vh - 140px);
+  overflow: auto;
+  background: rgba(255,255,255,0.96);
+  border: 2px solid #111;
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.18);
+  z-index: 9999;
+  padding: 12px 12px 10px;
+  font-family: inherit;
+}
+#nextQuestionsPanel .nqHeader{
+  display:flex;
+  align-items:center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+#nextQuestionsPanel .nqHeader .title{
+  font-weight: 800;
+  font-size: 14px;
+}
+#nextQuestionsPanel .nqHeader button{
+  border: 1px solid #111;
+  background: #fff;
+  border-radius: 10px;
+  padding: 4px 9px;
+  cursor: pointer;
+  font-weight: 700;
+}
+#nextQuestionsPanel .nqNote{
+  font-size: 12px;
+  opacity: 0.85;
+  margin-bottom: 10px;
+}
+#nextQuestionsPanel .nqItem{
+  border: 1px solid rgba(0,0,0,0.18);
+  border-radius: 12px;
+  padding: 10px;
+  margin-bottom: 10px;
+  background: rgba(255,255,255,0.85);
+}
+#nextQuestionsPanel .nqItem .qLabel{
+  font-weight: 800;
+  font-size: 12px;
+  margin-bottom: 6px;
+}
+#nextQuestionsPanel .nqItem .formula{
+  margin: 0;
+  padding: 0;
+  font-size: 14px;
+}
+#nextQuestionsPill{
+  position: fixed;
+  right: 14px;
+  top: 110px;
+  z-index: 10000;
+  display: none;
+  border: 2px solid #111;
+  background: rgba(255,255,255,0.96);
+  border-radius: 999px;
+  padding: 8px 12px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.18);
+}
+/* Small screens: avoid covering the plot too much */
+@media (max-width: 900px){
+  #nextQuestionsPanel{ width: 280px; top: 90px; }
+}
+@media (max-width: 700px){
+  #nextQuestionsPanel{ right: 10px; left: 10px; width: auto; top: auto; bottom: 10px; max-height: 45vh; }
+  #nextQuestionsPill{ right: 10px; top: auto; bottom: 10px; }
+}
+</style>
+
+</head>
+
+<body>
+<header>
+  <h1>Root Locus 🎯 </h1>
+  <div class="sub">
+    Educational mini-game for engineering students. Solve each level to reveal the construction steps on the graph.
+    <div class="formula" id="headerFormula" style="display:none;">
+  <!-- Equation will appear here when a question is started -->
+</div>
+
+  </div>
+</header>
+
+<div class="wrap">
+  <!-- LEFT: Levels -->
+  <div class="left">
+    <div class="panel">
+      <div class="row">
+        <button id="btnReset" class="danger">Reset Progress</button>
+      </div>
+
+      <div style="margin-top:12px;">
+        <div class="cardTitle">Levels</div>
+        <div class="tiny">Complete a level → The graph updates automatically.</div>
+      </div>
+
+      <div class="levelList" id="levelList"></div>
+
+      <div style="margin-top:14px;">
+        <div class="cardTitle">Score</div>
+        <div class="smallMono" id="scoreBox">—</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: Gameplay + Canvas -->
+  <div class="right">
+    <div class="panel">
+      <div class="rightTop">
+        <div style="flex:1;">
+          <div class="cardTitle" id="lvlTitle">—</div>
+          <div class="tiny" id="lvlDesc">—</div>
+        </div>
+        <div class="box" style="min-width:260px;">
+          <div class="tiny"><b>Construction Progress</b> (Locked)</div>
+          <div class="checkGrid">
+            <!-- All unchecked by default, disabled so user can't toggle manually -->
+            <label class="chk"><input type="checkbox" id="layerPoles" disabled> <span>Poles/Zeros</span></label>
+            <label class="chk"><input type="checkbox" id="layerRealSeg" disabled> <span>Real-axis segments</span></label>
+            <label class="chk"><input type="checkbox" id="layerAsym" disabled> <span>Asymptotes</span></label>
+            <label class="chk"><input type="checkbox" id="layerBreak" disabled> <span>Breakaway</span></label>
+            <label class="chk"><input type="checkbox" id="layerCross" disabled> <span>Imag-axis crossing</span></label>
+            <label class="chk"><input type="checkbox" id="layerLocus" checked> <span>Root locus</span></label>
+          </div>
+        </div>
+      </div>
+
+      <canvas id="plot" width="1100" height="560"></canvas>
+
+      <div class="kbar">
+        <div class="badge">k</div>
+        <input id="kSlider" type="range" min="0" max="50" step="0.1" value="0" />
+        <div class="badge" id="kVal">0.0</div>
+      </div>
+
+      <div class="hint" id="plotHint">
+        The graph will populate step-by-step as you solve the levels below.
+      </div>
+    </div>
+
+    <div class="panel" id="gamePanel" style="display:none;">
+      <!-- dynamic content -->
+    </div>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+<script>
+/* =========================================================
+   Root Locus Quest — Single-file Educational Game
+   Example: G(s) = k / (s^3 + 3s^2 + 2s) = k / [s(s+1)(s+2)]
+   Closed-loop characteristic: s^3 + 3s^2 + 2s + k = 0
+   ========================================================= */
+
+/* ---------- Helpers: persistence ---------- */
+const LS_KEY = "rlq_progress_v2_nohint";
+function loadProgress(){
+  try { return JSON.parse(localStorage.getItem(LS_KEY)) || {}; }
+  catch { return {}; }
+}
+function saveProgress(p){ localStorage.setItem(LS_KEY, JSON.stringify(p)); }
+
+function toggleHint() {
+    const hint = document.getElementById("hintBox");
+    hint.style.display = hint.style.display === "none" ? "block" : "none";//////////////////////////////////////////////////////////////
+}
+
+
+/* ---------- Complex numbers ---------- */
+function C(re, im){ return {re, im}; }
+function cAdd(a,b){ return C(a.re+b.re, a.im+b.im); }
+function cSub(a,b){ return C(a.re-b.re, a.im-b.im); }
+function cMul(a,b){ return C(a.re*b.re - a.im*b.im, a.re*b.im + a.im*b.re); }
+function cDiv(a,b){
+  const d = b.re*b.re + b.im*b.im;
+  return C((a.re*b.re + a.im*b.im)/d, (a.im*b.re - a.re*b.im)/d);
+}
+function cAbs(a){ return Math.hypot(a.re, a.im); }
+function cArg(a){ return Math.atan2(a.im, a.re); }
+
+/* ---------- Solve cubic: x^3 + A x^2 + B x + C = 0 ---------- */
+function cubicRootsMonic(A, B, Cc){
+  const a = A, b = B, c = Cc;
+  const a3 = a/3;
+  
+  const p = b - a*a/3;
+  const q = (2*a*a*a)/27 - (a*b)/3 + c;
+  
+  const disc = (q*q)/4 + (p*p*p)/27;
+  
+  if (disc > 1e-9){
+    // One real root, two complex conjugates
+    const sqrtDisc = Math.sqrt(disc);
+    const u3 = -q/2 + sqrtDisc;
+    const v3 = -q/2 - sqrtDisc;
+    const u = Math.sign(u3) * Math.pow(Math.abs(u3), 1/3);
+    const v = Math.sign(v3) * Math.pow(Math.abs(v3), 1/3);
+    
+    const y1 = u + v;
+    const real1 = y1 - a3;
+    
+    // Complex pair
+    const realPart = -(u + v)/2 - a3;
+    const imagPart = (u - v) * Math.sqrt(3) / 2;
+    
+    return [
+      C(real1, 0),
+      C(realPart, imagPart),
+      C(realPart, -imagPart)
+    ];
+  } else if (disc < -1e-9) {
+    // Three distinct real roots
+    const r = Math.sqrt(-(p*p*p)/27);
+    const phi = Math.acos(Math.max(-1, Math.min(1, -q/(2*r))));
+    const m = 2*Math.sqrt(-p/3);
+    
+    const y1 = m*Math.cos(phi/3);
+    const y2 = m*Math.cos((phi+2*Math.PI)/3);
+    const y3 = m*Math.cos((phi+4*Math.PI)/3);
+    
+    return [
+      C(y1 - a3, 0),
+      C(y2 - a3, 0),
+      C(y3 - a3, 0)
+    ];
+  } else {
+    // Repeated roots
+    const y1 = 3*q/p;
+    const y2 = -3*q/(2*p);
+    return [
+      C(y1 - a3, 0),
+      C(y2 - a3, 0),
+      C(y2 - a3, 0)
+    ];
+  }
+}
+
+/* Solve quartic equation: s^4 + A*s^3 + B*s^2 + C*s + D = 0 */
+function quarticRootsMonic(A, B, C, D) {
+  // Using Ferrari's method for quartic
+  const a = A, b = B, c = C, d = D;
+  
+  // Depressed quartic: y^4 + p*y^2 + q*y + r = 0
+  const p = b - (3*a*a)/8;
+  const q = c - (a*b)/2 + (a*a*a)/8;
+  const r = d - (a*c)/4 + (a*a*b)/16 - (3*a*a*a*a)/256;
+  
+  // Resolve cubic: z^3 + (p/2)*z^2 + ((p^2-4r)/16)*z - q^2/64 = 0
+  const cubicA = p/2;
+  const cubicB = (p*p - 4*r)/16;
+  const cubicC = -(q*q)/64;
+  
+  const cubicRoots = cubicRootsMonic(cubicA, cubicB, cubicC);
+  let m = cubicRoots[0].re; // Take first real root
+  for (let root of cubicRoots) {
+    if (Math.abs(root.im) < 1e-9 && root.re > m) m = root.re;
+  }
+  
+  const sqrtM = Math.sqrt(Math.max(0, m));
+  const pm = p + 2*m;
+  const disc1 = pm - q/sqrtM;
+  const disc2 = pm + q/sqrtM;
+  
+  const roots = [];
+  
+  // First pair
+  if (disc1 >= 0) {
+    const sqrt1 = Math.sqrt(disc1);
+    roots.push({re: (-sqrtM - sqrt1)/2 - a/4, im: 0});
+    roots.push({re: (-sqrtM + sqrt1)/2 - a/4, im: 0});
+  } else {
+    const imag1 = Math.sqrt(-disc1)/2;
+    roots.push({re: -sqrtM/2 - a/4, im: imag1});
+    roots.push({re: -sqrtM/2 - a/4, im: -imag1});
+  }
+  
+  // Second pair
+  if (disc2 >= 0) {
+    const sqrt2 = Math.sqrt(disc2);
+    roots.push({re: (sqrtM - sqrt2)/2 - a/4, im: 0});
+    roots.push({re: (sqrtM + sqrt2)/2 - a/4, im: 0});
+  } else {
+    const imag2 = Math.sqrt(-disc2)/2;
+    roots.push({re: sqrtM/2 - a/4, im: imag2});
+    roots.push({re: sqrtM/2 - a/4, im: -imag2});
+  }
+  
+  return roots;
+}
+
+/* Our polynomial: s^3 + 3 s^2 + 2 s + k = 0  -> A=3, B=2, C=k */
+function closedLoopRoots(k){
+  const qid = truth.id;
+  
+  if (qid === 'Q1') {
+    // s³ + 3s² + 2s + k = 0
+    return cubicRootsMonic(3, 2, k);
+  } else if (qid === 'Q2') {
+    // s² + (4+k)s + (13+4k) = 0
+    const a = 1, b = 4+k, c = 13+4*k;
+    const disc = b*b - 4*a*c;
+    if (disc >= 0) {
+      const sqrt = Math.sqrt(disc);
+      return [
+        {re: (-b + sqrt)/(2*a), im: 0},
+        {re: (-b - sqrt)/(2*a), im: 0}
+      ];
+    } else {
+      const real = -b/(2*a);
+      const imag = Math.sqrt(-disc)/(2*a);
+      return [
+        {re: real, im: imag},
+        {re: real, im: -imag}
+      ];
+    }
+  } else if (qid === 'Q3') {
+    // s³ + 10s² + (57+k)s + (82+8k) = 0
+    return cubicRootsMonic(10, 57+k, 82+8*k);
+  } else if (qid === 'Q4') {
+    // s³ + 10s² + 57s + (82+k) = 0
+    return cubicRootsMonic(10, 57, 82+k);
+  } else if (qid === 'Q5') {
+    // s³ + (10+k)s² + (57+20k)s + (82+96k) = 0
+    return cubicRootsMonic(10+k, 57+20*k, 82+96*k);
+  }
+  
+  // Default to Q1
+  return cubicRootsMonic(3, 2, k);
+}
+
+/* ---------- Ground truth for this example (for checking) ---------- */
+/* ---------- Question bank ---------- */
+const questionBank = {
+  Q1: {
+    id:"Q1",
+    tfLatex: "G(s)=\\frac{k}{s^3+3s^2+2s}",
+    // (s)(s+1)(s+2)
+    poles: [0, -1, -2],
+    polesComplex: [],
+    zeros: [],
+    zerosComplex: [],
+    poleText: "-6+2j, -6-2j",
+    zeroText: "-25",
+    realSegments: [
+      {name:"(-\\infty, -2)", ok:true},
+      {name:"(-2, -1)", ok:false},
+      {name:"(-1, 0)", ok:true},
+      {name:"(0, \\infty)", ok:false},
+    ],
+    asymCount: 3,
+    centroid: -1,
+    asymAngles: [60, 180, -60],
+    breakawayValid: -0.42265,
+    stableRange: {min:0, max:6, open:true},   // (0,6)
+    charEqHtml: "s³ + 3s² + 2s + k = 0",
+    imagCross: {k:6, w:Math.sqrt(2)}          // at k=6, s=±j√2
+  },
+
+  Q2: {
+    id:"Q2",
+    tfLatex: "G(s)=\\frac{k(s+4)}{s^2+4s+13}",
+    poles: [],                 // real-axis poles only (none)
+    polesComplex: [ {re:-2, im:3}, {re:-2, im:-3} ],
+    zeros: [-4],
+    zerosComplex: [],
+    poleText: "-6+2j, -6-2j",
+    zeroText: "-25",
+    realSegments: [
+      {name:"(-\\infty, -4)", ok:true},
+      {name:"(-4, \\infty)", ok:false},
+    ],
+    asymCount: 1,
+    centroid: 0,
+    asymAngles: [180],
+    breakawayValid: -7.6,
+    stableRange: {min:-3.25, max:Infinity, open:true}, // (0,∞)
+    charEqHtml: "s² + (4+k)s + (13+4k) = 0",
+    imagCross: null
+  },
+
+  Q3: {
+    id:"Q3",
+    tfLatex: "G(s)=\\frac{k(s+8)}{s^3+10s^2+57s+82}",
+    poles: [-2],
+    polesComplex: [ {re:-4, im:5}, {re:-4, im:-5} ],
+    zeros: [-8],
+    zerosComplex: [],
+    poleText: "-6+2j, -6-2j",
+    zeroText: "-25",
+    realSegments: [
+      {name:"(-\\infty, -8)", ok:false},
+      {name:"(-8, -2)", ok:true},
+      {name:"(-2, \\infty)", ok:false},
+    ],
+    asymCount: 2,
+    centroid: -1,
+    asymAngles: [90, -90],
+    breakawayValid: null,
+    stableRange: {min:-10.25, max:Infinity, open:true},
+    charEqHtml: "s³ + 10s² + (57+k)s + (82+8k) = 0",
+    imagCross: null
+  },
+
+  Q4: {
+    id:"Q4",
+    tfLatex: "G(s)=\\frac{k}{s^3+10s^2+57s+82}",
+    poles: [-2],
+    polesComplex: [ {re:-4, im:5}, {re:-4, im:-5} ],
+    zeros: [],
+    zerosComplex: [],
+    poleText: "-6+2j, -6-2j",
+    zeroText: "-25",
+    realSegments: [
+      {name:"(-\\infty, -2)", ok:true},
+      {name:"(-2, \\infty)", ok:false},
+    ],
+    asymCount: 3,
+    centroid: -3.33,
+    asymAngles: [180, 60, -60],
+    breakawayValid: null,
+    stableRange: {min:488, max:Infinity, open:true},
+    charEqHtml: "s³ + 10s² + 57s + (82+k) = 0",
+    imagCross: {k:488, w:7.55}
+  },
+
+  Q5: {
+    id:"Q5",
+    tfLatex: "G(s)=\\frac{k(s+8)(s+12)}{s^3+10s^2+57s+82}",
+    poles: [-2],
+    polesComplex: [ {re:-4, im:5}, {re:-4, im:-5} ],
+    zeros: [-8, -12],
+    zerosComplex: [],
+    poleText: "-6+2j, -6-2j",
+    zeroText: "-25",
+    realSegments: [
+      {name:"(-\\infty, -12)", ok:true},
+      {name:"(-12, -8)", ok:false},
+      {name:"(-8, -2)", ok:true},
+      {name:"(-2, \\infty)", ok:false},
+    ],
+    asymCount: 1,
+    centroid: 10,
+    asymAngles: [180],
+    breakawayValid: -25.63,
+    stableRange: {min:-0.854, max:Infinity, open:true},
+    charEqHtml: "s³ + (10+k)s² + (57+20k)s + (82+96k) = 0",
+    imagCross: null
+  },
+};
+
+let truth = questionBank.Q1;
+
+
+/* ---------- UI state ---------- */
+const levels = [
+  {
+    id:"L1",
+    title:"Level 1 — Poles & Zeros",
+    desc:"Type the open-loop poles (×) and zeros (○), real or complex.",
+    render: renderL1
+  },
+  {
+    id:"L2",
+    title:"Level 2 — Real-Axis Segments",
+    desc:"Select which real-axis intervals belong to the root locus (odd # of poles/zeros to the right).",
+    render: renderL2
+  },
+  {
+    id:"L3",
+    title:"Level 3 — Asymptotes & Centroid",
+    desc:"Find number of asymptotes (n−m) and centroid σA = (Σp − Σz)/(n−m).",
+    render: renderL3
+  },
+  {
+    id:"L4",
+    title:"Level 4 — Asymptote Angles",
+    desc:"Compute asymptote angles θ = (2q+1)180°/(n−m). Enter the 3 angles.",
+    render: renderL4
+  },
+  {
+    id:"L5",
+    title:"Level 5 — Breakaway Point",
+    desc:"Solve dK/ds = 0 and choose the valid breakaway point that lies on a real-axis locus segment.",
+    render: renderL5
+  },
+  {
+    id:"L6",
+    title:"Level 6 — Routh Stability Range",
+    desc:"Use Routh table to find for which k the closed-loop system is stable.",
+    render: renderL6
+  },
+  {
+    id:"L7",
+    title:"Level 7 — Imaginary-Axis Crossing",
+    desc:"Find k and ω when the locus crosses the imaginary axis (s = ±jω).",
+    render: renderL7
+  }
+];
+
+let progress = loadProgress();
+let questionStarted = false; // Track if any question has been started
+function isDone(id){ return !!progress[id]; }
+function unlock(id){
+  progress[id]=true; saveProgress(progress); refreshAll();
+  // Ensure unified success feedback appears after any level is unlocked.
+  // If the level's render cleared feedback, append the message once after render.
+  setTimeout(()=>{
+    const gp = document.getElementById('gamePanel');
+    if (!gp) return;
+    if (gp.querySelectorAll('.feedback').length===0){
+      gp.appendChild(setFeedback(`Correct!😄✅ Keep going—you're building the full root locus step by step.`, true));
+    }
+  }, 10);
+}
+
+function maxUnlockedIndex(){
+  let idx=0;
+  for (let i=0;i<levels.length;i++){
+    if (i===0) { idx = 0; continue; }
+    if (isDone(levels[i-1].id)) idx = i;
+    else break;
+  }
+  return idx;
+}
+
+let currentLevelIndex = 0;
+function canOpenLevel(i){
+  if (i===0) return questionStarted; // Level 1 requires a question to be started
+  return isDone(levels[i-1].id);
+}
+
+/* ---------- Level list rendering ---------- */
+const levelListEl = document.getElementById("levelList");
+function renderLevelList(){
+  levelListEl.innerHTML = "";
+  for (let i=0;i<levels.length;i++){
+    const L = levels[i];
+    const btn = document.createElement("button");
+    btn.className = "lvlBtn" + (i===currentLevelIndex ? " active":"");
+    const done = isDone(L.id);
+    const locked = !canOpenLevel(i);
+    btn.innerHTML = `
+      <div class="t">${L.title}
+        ${done ? `<span class="badge good">DONE</span>` : locked ? `<span class="badge bad">LOCKED</span>` : `<span class="badge">PLAY</span>`}
+      </div>
+      <div class="d">${L.desc}</div>
+    `;
+    btn.onclick = () => {
+      if (!canOpenLevel(i)){
+        alert("Finish the previous level first 🙂");
+        return;
+      }
+      currentLevelIndex = i;
+      refreshAll();
+    };
+    levelListEl.appendChild(btn);
+  }
+}
+
+/* ---------- Score box ---------- */
+function renderScore(){
+  const doneCount = levels.filter(l=>isDone(l.id)).length;
+  const unlocked = maxUnlockedIndex()+1;
+  document.getElementById("scoreBox").textContent =
+`Levels done: ${doneCount}/${levels.length}
+Unlocked up to: Level ${unlocked}`;
+}
+
+/* ---------- Canvas Plot ---------- */
+const canvas = document.getElementById("plot");
+const ctx = canvas.getContext("2d");
+
+const layers = {
+  poles: document.getElementById("layerPoles"),
+  realSeg: document.getElementById("layerRealSeg"),
+  asym: document.getElementById("layerAsym"),
+  brk: document.getElementById("layerBreak"),
+  cross: document.getElementById("layerCross"),
+  locus: document.getElementById("layerLocus"),
+};
+
+function W(){ return canvas.width; }
+function H(){ return canvas.height; }
+
+// plot window (seconds^-1)
+let view = {xmin:-1.2, xmax:0.8, ymin:-5, ymax:5};
+
+function toX(x){ return (x - view.xmin) / (view.xmax - view.xmin) * W(); }
+function toY(y){ return (view.ymax - y) / (view.ymax - view.ymin) * H(); }
+
+function drawAxes(){
+  ctx.clearRect(0,0,W(),H());
+
+  // grid
+  ctx.globalAlpha = 0.25;
+  ctx.lineWidth = 1;
+  for (let gx = Math.ceil(view.xmin); gx <= Math.floor(view.xmax); gx++){
+    const px = toX(gx);
+    ctx.beginPath();
+    ctx.moveTo(px, 0); ctx.lineTo(px, H());
+    ctx.strokeStyle = "#000";
+    ctx.setLineDash([4,8]);
+    ctx.stroke();
+  }
+  for (let gy = Math.ceil(view.ymin); gy <= Math.floor(view.ymax); gy++){
+    const py = toY(gy);
+    ctx.beginPath();
+    ctx.moveTo(0, py); ctx.lineTo(W(), py);
+    ctx.strokeStyle = "#000";
+    ctx.setLineDash([4,8]);
+    ctx.stroke();
+  }
+  ctx.setLineDash([]);
+  ctx.globalAlpha = 1;
+
+  // axes lines
+  ctx.lineWidth = 3;
+  ctx.strokeStyle = "#000";
+  ctx.beginPath();
+  ctx.moveTo(toX(0), 0); ctx.lineTo(toX(0), H());
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(0, toY(0)); ctx.lineTo(W(), toY(0));
+  ctx.stroke();
+
+  // labels
+  ctx.fillStyle = "#000";
+  ctx.font = "16px ui-monospace, monospace";
+  ctx.fillText("Im", toX(0)+8, 18);
+  ctx.fillText("Re", W()-28, toY(0)-8);
+}
+
+function drawPole(x,y){
+  const px = toX(x), py = toY(y);
+  ctx.lineWidth = 4;
+  ctx.strokeStyle = "#000";
+  ctx.beginPath();
+  ctx.moveTo(px-10, py-10); ctx.lineTo(px+10, py+10);
+  ctx.moveTo(px+10, py-10); ctx.lineTo(px-10, py+10);
+  ctx.stroke();
+}
+
+function drawZero(x,y){
+  const px = toX(x), py = toY(y);
+  ctx.lineWidth = 4;
+  ctx.strokeStyle = "#000";
+  ctx.beginPath();
+  ctx.arc(px, py, 11, 0, Math.PI*2);
+  ctx.stroke();
+}
+
+function drawDot(x,y,r=5){
+  ctx.beginPath();
+  ctx.arc(toX(x), toY(y), r, 0, Math.PI*2);
+  ctx.fill();
+}
+
+function drawRealSegments(){
+  ctx.lineWidth = 7;
+  ctx.strokeStyle = "#d33";
+  
+  // Draw segments dynamically based on truth.realSegments
+  truth.realSegments.forEach(seg => {
+    if (!seg.ok) return; // Only draw segments that are on the locus
+    
+    // Parse segment name like "(-∞, -4)" or "(-1, 0)"
+    const match = seg.name.match(/\(([^,]+),\s*([^)]+)\)/);
+    if (!match) return;
+    
+    let x1 = match[1].trim();
+    let x2 = match[2].trim();
+    
+    // Handle infinity symbols
+    if (x1.includes('\\infty') || x1.includes('inf') || x1 === '-∞') x1 = view.xmin;
+    else x1 = parseFloat(x1);
+    
+    if (x2.includes('\\infty') || x2.includes('inf') || x2 === '∞') x2 = view.xmax;
+    else x2 = parseFloat(x2);
+    
+    ctx.beginPath();
+    ctx.moveTo(toX(x1), toY(0));
+    ctx.lineTo(toX(x2), toY(0));
+    ctx.stroke();
+  });
+}
+
+function drawAsymptotes(){
+  const c = truth.centroid;
+  const angles = truth.asymAngles.map(d=>d*Math.PI/180);
+  ctx.lineWidth = 3;
+  
+  // Q4 uses cyan/light blue asymptotes, others use green
+  const isQ4 = truth.id === "Q4";
+  ctx.strokeStyle = isQ4 ? "#00bcd4" : "#0b5"; // Cyan for Q4, green for others
+  
+  ctx.setLineDash([12,12]);
+
+  angles.forEach(th=>{
+    const dx = Math.cos(th), dy = Math.sin(th);
+    const len = isQ4 ? 8 : 20; // Shorter asymptotes for Q4
+    const x1 = c - dx*len, y1 = 0 - dy*len;
+    const x2 = c + dx*len, y2 = 0 + dy*len;
+    ctx.beginPath();
+    ctx.moveTo(toX(x1), toY(y1));
+    ctx.lineTo(toX(x2), toY(y2));
+    ctx.stroke();
+  });
+
+  ctx.setLineDash([]);
+  ctx.fillStyle = isQ4 ? "#00bcd4" : "#0b5";
+  drawDot(c,0,6);
+  ctx.fillStyle = "#000";
+  ctx.font = "14px ui-monospace, monospace";
+  ctx.fillText("centroid", toX(c)+10, toY(0)-12);
+}
+
+function drawBreakaway(){
+  const x = truth.breakawayValid;
+  ctx.fillStyle = "#000";
+  drawDot(x,0,7);
+  ctx.font = "14px ui-monospace, monospace";
+  ctx.fillText("breakaway", toX(x)+12, toY(0)+20);
+}
+
+function drawImagCross(){
+  const w = truth.imagCross.w;
+  ctx.fillStyle = "#000";
+  drawDot(0, w, 7);
+  drawDot(0, -w, 7);
+  ctx.font = "14px ui-monospace, monospace";
+  ctx.fillText("crossing", toX(0)+12, toY(w)-14);
+}
+
+function sortRootsStable(roots){
+  return roots.slice().sort((a,b)=>{
+    const ar = Math.abs(a.im) < 1e-6;
+    const br = Math.abs(b.im) < 1e-6;
+    if (ar && br) return a.re - b.re;   // both real
+    return a.im - b.im;                 // complex ordering
+  });
+}
+
+function drawLocus(){
+  let KMAX = 20;
+  if (truth.id === "Q2") KMAX = 200;
+  if (truth.id === "Q3") KMAX = 200;
+  if (truth.id === "Q4") KMAX = 500;
+  if (truth.id === "Q5") KMAX = 100;
+  const steps = 1000;  // Increased from 500 for smoother curves
+
+  // Get initial roots at k=0.001 (avoid k=0 which may have poles)
+  let prevRoots = sortRootsStable(closedLoopRoots(0.001));
+  const numRoots = prevRoots.length;
+  
+  // Build tracks by following each root continuously
+  const tracks = Array(numRoots).fill(null).map(() => []);
+  
+  prevRoots.sort((a,b) => a.re - b.re);
+  
+  for (let j=0; j<numRoots; j++) tracks[j].push(prevRoots[j]);
+  
+  for (let i=1; i<=steps; i++){
+    const k = (KMAX*i)/steps;
+    let currRoots = closedLoopRoots(k);
+    
+    // Match current roots to previous roots (nearest neighbor with better tracking)
+    const matched = Array(numRoots).fill(false);
+    const newOrder = Array(numRoots);
+    
+    for (let t=0; t<numRoots; t++){
+      let bestIdx = -1;
+      let bestDist = Infinity;
+      
+      for (let j=0; j<numRoots; j++){
+        if (matched[j]) continue;
+        const dist = cAbs(cSub(currRoots[j], prevRoots[t]));
+        if (dist < bestDist){
+          bestDist = dist;
+          bestIdx = j;
+        }
+      }
+      
+      matched[bestIdx] = true;
+      newOrder[t] = currRoots[bestIdx];
+      tracks[t].push(currRoots[bestIdx]);
+    }
+    
+    prevRoots = newOrder;
+  }
+
+  // Draw the branches
+  ctx.lineWidth = 4.5;
+  ctx.strokeStyle = "rgba(255, 165, 0, 0.90)"; // Orange color like in the image
+  
+  tracks.forEach(track => {
+    ctx.beginPath();
+    for (let i=0; i<track.length; i++){
+      const p = track[i];
+      const px = toX(p.re);
+      const py = toY(p.im);
+      if (i === 0) {
+        ctx.moveTo(px, py);
+      } else {
+        ctx.lineTo(px, py);
+      }
+    }
+    ctx.stroke();
+  });
+
+  // Show current k roots
+  const k = parseFloat(document.getElementById("kSlider").value);
+  const rr = closedLoopRoots(k);
+  ctx.fillStyle = "#000";
+  rr.forEach(p => drawDot(p.re, p.im, 6));
+
+  ctx.font = "15px ui-monospace, monospace";
+  ctx.fillText(`closed-loop poles at k=${k.toFixed(1)}`, 14, 28);
+}
+
+function updateCheckboxesFromProgress() {
+    // Automatically check the construction layer boxes based on progress
+    // Level 1 Done -> Poles
+    layers.poles.checked = isDone("L1");
+    
+    // Level 2 Done -> Real Segments
+    layers.realSeg.checked = isDone("L2");
+    
+    // Level 4 Done (includes L3) -> Asymptotes
+    layers.asym.checked = isDone("L4");
+    
+    // Level 5 Done -> Breakaway
+    layers.brk.checked = isDone("L5");
+    
+    // Level 7 Done -> Crossing
+    layers.cross.checked = isDone("L7");
+    
+    // Root locus: reveal once Level 7 is solved or reached
+    layers.locus.checked = isDone("L7") || maxUnlockedIndex() >= 6;
+}
+
+function redraw(){
+  // Keep layer checkboxes synced before drawing
+  updateCheckboxesFromProgress();
+
+  // Set appropriate view for each question
+  const viewConfigs = {
+    Q1: {xmin:-2.5, xmax:1, ymin:-6, ymax:6},
+    Q2: {xmin:-12, xmax:2, ymin:-7, ymax:7},
+    Q3: {xmin:-9, xmax:1, ymin:-13, ymax:13},
+    Q4: {xmin:-14, xmax:1, ymin:-8, ymax:8},
+    Q5: {xmin:-35, xmax:3, ymin:-18, ymax:18},
+  };
+  
+  const config = viewConfigs[truth.id] || {xmin:-2.5, xmax:1, ymin:-6, ymax:6};
+  view = config;
+
+  drawAxes();
+
+  if (layers.realSeg.checked) drawRealSegments();
+
+  if (layers.asym.checked) drawAsymptotes();
+
+  if (layers.brk.checked) drawBreakaway();
+
+  if (layers.cross.checked) drawImagCross();
+
+  
+  if (layers.poles.checked){
+    truth.poles.forEach(p=> drawPole(p,0));
+    (truth.polesComplex||[]).forEach(p=> drawPole(p.re, p.im));
+    truth.zeros.forEach(z=> drawZero(z,0));
+    (truth.zerosComplex||[]).forEach(z=> drawZero(z.re, z.im));
+    ctx.font = "12px ui-monospace, monospace";
+    ctx.fillStyle = "#000";
+    ctx.fillText("open-loop poles/zeros", 14, H()-18);
+  }
+  
+  if (layers.locus.checked) drawLocus();
+}
+
+/* ---------- k slider ---------- */
+const kSlider = document.getElementById("kSlider");
+const kVal = document.getElementById("kVal");
+kSlider.addEventListener("input", ()=>{
+  kVal.textContent = parseFloat(kSlider.value).toFixed(1);
+  redraw();
+});
+
+/* ---------- Level content ---------- */
+const lvlTitle = document.getElementById("lvlTitle");
+const lvlDesc = document.getElementById("lvlDesc");
+const gamePanel = document.getElementById("gamePanel");
+
+function setFeedback(html, ok){
+  const div = document.createElement("div");
+  div.className = "feedback " + (ok ? "good":"bad");
+  div.innerHTML = html;
+  return div;
+}
+
+function approxEqual(a,b,tol=0.02){
+  return Math.abs(a-b) <= tol;
+}
+
+function parseNumsFromText(s){
+  return (s||"")
+    .replace(/[°]/g,"")
+    .split(/[^0-9\-\.+]+/)
+    .filter(x=>x.length)
+    .map(Number)
+    .filter(x=>Number.isFinite(x));
+}
+
+function fmtComplex(c){
+  const re = Number(c.re.toFixed(4)).toString();
+  const imAbs = Math.abs(c.im);
+  if (imAbs < 1e-9) return re;
+  const im = Number(imAbs.toFixed(4)).toString();
+  const sign = c.im >= 0 ? "+" : "-";
+  return `${re}${sign}${im}j`;
+}
+
+function parseComplexToken(tok){
+  const t = tok.trim().toLowerCase();
+  if (!t) return null;
+  const hasJ = t.includes("j") || t.includes("i");
+  if (!hasJ){
+    const r = Number(t);
+    return Number.isFinite(r) ? {re:r, im:0} : null;
+  }
+  const norm = t.replace(/i/g,"j");
+  if (!norm.endsWith("j")) return null;
+  const core = norm.slice(0, -1);
+  // find last + or - that splits real/imag (ignore leading sign)
+  let split = -1;
+  for (let i=1; i<core.length; i++){
+    const ch = core[i];
+    if (ch==='+' || ch==='-') split = i;
+  }
+  let re = 0, imStr = core;
+  if (split !== -1){
+    re = Number(core.slice(0, split));
+    imStr = core.slice(split);
+  }
+  const im = Number(imStr);
+  if (!Number.isFinite(im) || !Number.isFinite(re)) return null;
+  return {re, im};
+}
+
+function parseComplexList(raw){
+  const noneWords = ["none","no","na","n/a","nil","-"];
+  const txt = (raw||"").trim();
+  if (!txt) return {list:[], invalid:[]};
+  if (noneWords.includes(txt.toLowerCase())) return {list:[], invalid:[]};
+  const tokens = txt.split(/[,;\s]+/).filter(Boolean);
+  const list = [];
+  const invalid = [];
+  tokens.forEach(tok=>{
+    const c = parseComplexToken(tok);
+    if (c) list.push(c); else invalid.push(tok);
+  });
+  return {list, invalid};
+}
+
+function sameComplex(a,b,tol=0.05){
+  return Math.abs(a.re - b.re) <= tol && Math.abs(a.im - b.im) <= tol;
+}
+
+function compareComplexLists(want, got, tol=0.05){
+  const remaining = got.slice();
+  const missing = [];
+  want.forEach(w=>{
+    const idx = remaining.findIndex(g=>sameComplex(w,g,tol));
+    if (idx>=0) remaining.splice(idx,1); else missing.push(w);
+  });
+  return {missing, extra: remaining};
+}
+
+
+
+
+
+
+
+
+
+
+/* -------- Level 1: typed input (per question) -------- */
+function renderL1(){
+  // Targets: all open-loop poles/zeros, real or complex
+  const targetPoles = (truth.poles || []).map(re=>({re, im:0})).concat(truth.polesComplex || []);
+  const targetZeros = (truth.zeros || []).map(re=>({re, im:0})).concat(truth.zerosComplex || []);
+  const polesTxt = (truth.poleText || targetPoles.map(fmtComplex).join(", ") || "(see transfer function)").trim();
+  const zerosTxt = (truth.zeroText || (targetZeros.length ? targetZeros.map(fmtComplex).join(", ") : "none")).trim();
+
+  const polePlaceholder = (truth.poleText && truth.poleText.trim()) || (targetPoles.length ? targetPoles.map(fmtComplex).join(", ") : "none");
+  const zeroPlaceholder = (truth.zeroText && truth.zeroText.trim()) || (targetZeros.length ? targetZeros.map(fmtComplex).join(", ") : "none");
+  const noneWords = ["none","no","na","n/a","nil","-"]; // accept several variations
+
+  gamePanel.innerHTML = `
+    <h2 class="cardTitle">Task</h2>
+    <div class="box">
+      <div class="tiny">
+        <b>${truth.id}</b>: Determine the open-loop poles (×) and zeros (○) of the given transfer function G(s).
+        <br/>Poles are found by setting the denominator of G(s) equal to zero and solving for s.
+        <br/>Zeros are found by setting the numerator of G(s) equal to zero and solving for s.
+        <br/>(if there is no zeroes put none)
+       
+      </div>
+
+      <div class="row" style="margin-top:12px; gap:12px;">
+        <div>
+          <div class="tiny"><b>Open-loop poles (×)</b></div>
+          <input id="inpPolesL1" type="text" placeholder="${polePlaceholder}" aria-label="Open-loop poles" />
+        </div>
+        <div>
+          <div class="tiny"><b>Open-loop zeros (○)</b></div>
+          <input id="inpZerosL1" type="text" placeholder="${zeroPlaceholder}" aria-label="Open-loop zeros" />
+        </div>
+      </div>
+
+      <div class="row" style="margin-top:12px; align-items:center;">
+        <div class="row" style="gap:8px; margin-left:auto;">
+          <button class="fit" id="btnClearL1">Clear</button>
+          <button class="fit primary" id="btnCheckL1">Check</button>
+          <button class="fit" id="btnHintL1">Hint</button>
+        </div>
+      </div>
+
+      <div id="hintBoxL1" class="hint" style="display:none;">
+        Break the fraction! Bottom = poles, top = zeros 😄
+      </div>
+    </div>
+  `;
+
+  const inpP = document.getElementById("inpPolesL1");
+  const inpZ = document.getElementById("inpZerosL1");
+
+  const showFeedback = (html, ok)=>{
+    gamePanel.querySelectorAll(".feedback").forEach(n=>n.remove());
+    gamePanel.appendChild(setFeedback(html, ok));
+  };
+
+  document.getElementById("btnClearL1").onclick = ()=>{
+    inpP.value = "";
+    inpZ.value = "";
+    gamePanel.querySelectorAll(".feedback").forEach(n=>n.remove());
+  };
+
+  document.getElementById("btnHintL1").onclick = () => {
+    const hint = document.getElementById("hintBoxL1");
+    hint.style.display = (hint.style.display === "none") ? "block" : "none";
+  };
+
+  document.getElementById("btnCheckL1").onclick = ()=>{
+    const wantP = targetPoles.slice();
+    const wantZ = targetZeros.slice();
+
+    const rawP = inpP.value.trim();
+    const rawZ = inpZ.value.trim();
+    const parsedP = parseComplexList(rawP);
+    const parsedZ = parseComplexList(rawZ);
+
+    const invalids = [];
+    if (parsedP.invalid.length) invalids.push(`poles: ${parsedP.invalid.join(", ")}`);
+    if (parsedZ.invalid.length) invalids.push(`zeros: ${parsedZ.invalid.join(", ")}`);
+    if (invalids.length){
+      showFeedback(`❌ Could not read some entries → ${invalids.join("; ")}. Use commas/spaces and j/i for imaginary parts.`, false);
+      return;
+    }
+
+    const gotP = parsedP.list;
+    const gotZ = parsedZ.list;
+
+    const dp = compareComplexLists(wantP, gotP, 0.05);
+    const dz = compareComplexLists(wantZ, gotZ, 0.05);
+    const ok = dp.missing.length===0 && dp.extra.length===0 && dz.missing.length===0 && dz.extra.length===0;
+
+    if (ok){
+      showFeedback(`Correct!😄✅ Keep going—you're building the full root locus step by step.`, true);
+      unlock("L1");
+    } else {
+      const msgParts = [];
+      if (dp.missing.length) msgParts.push(`Missing poles: <b>${dp.missing.map(fmtComplex).join(", ")}</b>`);
+      if (dp.extra.length)   msgParts.push(`Extra poles: <b>${dp.extra.map(fmtComplex).join(", ")}</b>`);
+      if (dz.missing.length) msgParts.push(`Missing zeros: <b>${dz.missing.map(fmtComplex).join(", ")}</b>`);
+      if (dz.extra.length)   msgParts.push(`Extra zeros: <b>${dz.extra.map(fmtComplex).join(", ")}</b>`);
+      if (!msgParts.length) msgParts.push(`Check that all poles/zeros are included.`);
+
+      showFeedback(
+        `❌ Not yet. You entered poles: <b>${gotP.map(fmtComplex).join(", ") || "none"}</b> and zeros: <b>${gotZ.map(fmtComplex).join(", ") || "none"}</b>.<br/>${msgParts.join(" · ")}`,
+        false
+      );
+    }
+  };
+}
+
+
+function renderL2(){
+  gamePanel.innerHTML = `
+    <h2 class="cardTitle">Task</h2>
+    <div class="box">
+      <div class="tiny">
+        Select the real-axis intervals that belong to the root locus.
+        <br/>
+        How to decide:
+        <br/>- Choose a point in each interval on the real axis.
+        <br/>- Count the total number of open-loop poles (×) and zeros (○) to the right of that point.
+        <br/>- If the number is <b>odd</b>, that interval belongs to the root locus.
+        <br/>- If the number is <b>even</b>, it does not belong to the root locus.
+        <br/>Select all intervals that satisfy this rule.
+      </div>
+
+      <div class="checkGrid" id="segChecks"></div>
+
+      <div class="row" style="margin-top:10px; gap:8px; align-items:center;">
+        <button class="fit primary" id="btnCheckL2">Check</button>
+        <button class="fit" id="btnHintL2">Hint</button>
+      </div>
+      <div id="hintBoxL2" class="hint" style="display:none; margin-top:8px;">
+        Look to the right of the interval.<br/>Odd count = root locus.
+      </div>
+    </div>
+  `;
+
+  const segChecks = document.getElementById("segChecks");
+  truth.realSegments.forEach((s,i)=>{
+    const id = "seg_"+i;
+    const lab = document.createElement("label");
+    lab.className = "chk";
+    // Not disabled here, this is the interactive part for answering
+    lab.style.cursor = "pointer";
+    lab.style.opacity = "1";
+    lab.innerHTML = `<input type="checkbox" id="${id}"> ${s.name}`;
+    segChecks.appendChild(lab);
+  });
+
+  document.getElementById("btnCheckL2").onclick = ()=>{
+    const picks = truth.realSegments.map((_,i)=>document.getElementById("seg_"+i).checked);
+    const ok = picks.every((v,i)=>v===truth.realSegments[i].ok);
+    gamePanel.querySelectorAll(".feedback").forEach(n=>n.remove());
+    if (ok){
+      gamePanel.appendChild(setFeedback(
+        `Correct!😄✅ Keep going—you're building the full root locus step by step.`,
+        true
+      ));
+      unlock("L2");
+    } else {
+      gamePanel.appendChild(setFeedback(
+        `❌ Not quite. Try again using the "odd to the right" rule.`,
+        false
+      ));
+    }
+  };
+
+  document.getElementById("btnHintL2").onclick = () => {
+    const hint = document.getElementById("hintBoxL2");
+    hint.style.display = (hint.style.display === "none") ? "block" : "none";
+  };
+}
+
+/* -------- Level 3: asymptotes & centroid -------- */
+function renderL3(){
+  gamePanel.innerHTML = `
+    <h2 class="cardTitle">Task</h2>
+    <div class="box">
+      <div class="tiny">
+        Enter:
+        <br/>n = number of poles of G(s)H(s)
+        <br/>m = number of zeros of G(s)H(s)
+        <br/>1) number of asymptotes = n − m
+        <br/>2) centroid σA = (Σp − Σz)/(n − m)
+      </div>
+
+      <div class="row" style="margin-top:10px;">
+        <div>
+          <div class="tiny"><b># asymptotes</b></div>
+          <input type="number" id="asymCount" placeholder="e.g. 1" />
+        </div>
+        <div>
+          <div class="tiny"><b>Centroid σA</b></div>
+          <input type="number" step="0.01" id="centroid" placeholder="e.g. -2.5" />
+        </div>
+      </div>
+
+      <div class="row" style="margin-top:10px; gap:8px; align-items:center;">
+        <button class="fit primary" id="btnCheckL3">Check</button>
+        <button class="fit" id="btnHintL3">Hint</button>
+      </div>
+      <div id="hintBoxL3" class="hint" style="display:none; margin-top:8px;">
+        Number of asymptotes = poles − zeros.<br/>Centroid = (sum of poles − sum of zeros) ÷ (poles − zeros).
+      </div>
+    </div>
+  `;
+
+  document.getElementById("btnCheckL3").onclick = ()=>{
+    const n = Number(document.getElementById("asymCount").value);
+    const c = Number(document.getElementById("centroid").value);
+    const ok = (n===truth.asymCount) && approxEqual(c, truth.centroid, 0.02);
+    gamePanel.querySelectorAll(".feedback").forEach(n=>n.remove());
+    if (ok){
+      gamePanel.appendChild(setFeedback(
+        `Correct!😄✅ Keep going—you're building the full root locus step by step.`,
+        true
+      ));
+      unlock("L3");
+    } else {
+      gamePanel.appendChild(setFeedback(
+        `❌ Incorrect. Check your formulas for n-m and centroid.`,
+        false
+      ));
+    }
+  };
+  document.getElementById("btnHintL3").onclick = () => {
+    const hint = document.getElementById("hintBoxL3");
+    hint.style.display = (hint.style.display === "none") ? "block" : "none";
+  };
+}
+
+/* -------- Level 4: angles -------- */
+function normalizeAngleDeg(a){
+  let x = a;
+  while (x <= -180) x += 360;
+  while (x > 180) x -= 360;
+  return x;
+}
+function renderL4(){
+  gamePanel.innerHTML = `
+    <h2 class="cardTitle">Task</h2>
+    <div class="box">
+      <div class="tiny">
+        Enter the asymptote angles (degrees). Any order is fine.
+        <br/>Formula: θ = (2q+1)180°/(n−m), q = 0 ... (n−m−1).
+        <br/>NOTE: q is an integer (q = 0 to n − m − 1) used to calculate the asymptote angles.
+      </div>
+
+      <div style="margin-top:10px;">
+        <div class="tiny"><b>Angles</b> (separated by commas)</div>
+        <input type="text" id="angText" placeholder="e.g. 90, 270" />
+      </div>
+
+      <div class="row" style="margin-top:10px; gap:8px; align-items:center;">
+        <button class="fit primary" id="btnCheckL4">Check</button>
+        <button class="fit" id="btnHintL4">Hint</button>
+      </div>
+      <div id="hintBoxL4" class="hint" style="display:none; margin-top:8px;">
+        Substitute q = 0 to n−m−1 into<br/>
+        θ = (2q+1)180°/(n−m)
+      </div>
+    </div>
+  `;
+
+  document.getElementById("btnCheckL4").onclick = ()=>{
+    const nums = parseNumsFromText(document.getElementById("angText").value)
+      .map(normalizeAngleDeg)
+      .sort((a,b)=>a-b);
+
+    const target = truth.asymAngles.map(normalizeAngleDeg).sort((a,b)=>a-b);
+
+    const ok = nums.length===truth.asymAngles.length && nums.every((v,i)=>Math.abs(v-target[i])<1.0);
+
+    gamePanel.querySelectorAll(".feedback").forEach(n=>n.remove());
+    if (ok){
+      gamePanel.appendChild(setFeedback(
+        `Correct!😄✅ Keep going—you're building the full root locus step by step.`,
+        true
+      ));
+      unlock("L4");
+    } else {
+      gamePanel.appendChild(setFeedback(
+        `❌ Not quite. Check your calculation for (2q+1)180 / (n-m).`,
+        false
+      ));
+    }
+  };
+  document.getElementById("btnHintL4").onclick = () => {
+    const hint = document.getElementById("hintBoxL4");
+    hint.style.display = (hint.style.display === "none") ? "block" : "none";
+  };
+}
+
+function parseMaybeNumber(txt){
+  const t = (txt||"").trim().toLowerCase();
+  if (!t) return null;
+  if (t==="inf" || t==="infinity" || t==="∞") return Infinity;
+  if (t==="none" || t==="na" || t==="n/a" || t==="no" || t==="-" ) return "none";
+  const v = Number(t);
+  return Number.isFinite(v) ? v : null;
+}
+
+/* -------- Level 5: breakaway -------- */
+function renderL5(){
+  const hasBr = (truth.breakawayValid!=null && Number.isFinite(truth.breakawayValid));
+
+  if (!hasBr){
+    gamePanel.innerHTML = `
+      <h2 class="cardTitle">Task</h2>
+      <div class="box">
+        <div class="tiny">
+          Breakaway / break-in points come from <b>dK/ds = 0</b> and must lie on a real-axis root-locus segment.
+          <br/><b>For this question, there is no valid real-axis breakaway/break-in point.</b>
+        </div>
+        <div class="row" style="margin-top:12px;">
+          <button class="fit primary" id="btnDoneL5">Done</button>
+        </div>
+      </div>
+    `;
+    document.getElementById("btnDoneL5").onclick = ()=>{
+      gamePanel.querySelectorAll(".feedback").forEach(n=>n.remove());
+      gamePanel.appendChild(setFeedback(`Correct!😄✅ Keep going—you're building the full root locus step by step.`, true));
+      unlock("L5");
+    };
+    return;
+  }
+
+  gamePanel.innerHTML = `
+    <h2 class="cardTitle">Task</h2>
+    <div class="box">
+      <div class="tiny">
+        Find the real-axis breakaway (or break-in) point of the root locus.
+        <br/>
+        How to find it:
+        <br/>- Write the characteristic equation in the form 1 + k G(s) = 0.
+        <br/>- Express k as a function of s.
+        <br/>- Differentiate k with respect to s, and set: d k / d s = 0.
+        <br/>- Solve for s.
+        <br/>- Choose the solution that lies on a real-axis root-locus segment.
+        <br/>- Enter the valid breakaway point (approximate value).
+      </div>
+
+      <div style="margin-top:10px;">
+        <div class="tiny"><b>Enter the valid value</b> (approx)</div>
+        <input type="text" id="brVal" placeholder="e.g. -0.423" />
+      </div>
+
+      <div class="row" style="margin-top:10px; gap:8px; align-items:center;">
+        <button class="fit primary" id="btnCheckL5">Check</button>
+        <button class="fit" id="btnHintL5">Hint</button>
+      </div>
+      <div id="hintBoxL5" class="hint" style="display:none; margin-top:8px;">
+        The breakaway point is found by solving d k / d s = 0
+      </div>
+    </div>
+  `;
+
+  document.getElementById("btnCheckL5").onclick = ()=>{
+    const parsed = parseMaybeNumber(document.getElementById("brVal").value);
+    const ok = (typeof parsed==="number" && Number.isFinite(parsed) && approxEqual(parsed, truth.breakawayValid, 0.10));
+
+    gamePanel.querySelectorAll(".feedback").forEach(n=>n.remove());
+    if (ok){
+      gamePanel.appendChild(setFeedback(`Correct!😄✅ Keep going—you're building the full root locus step by step.`, true));
+      unlock("L5");
+    } else {
+      gamePanel.appendChild(setFeedback(`❌ Not quite. Remember: the valid point must lie on a real-axis locus segment.`, false));
+    }
+  };
+  document.getElementById("btnHintL5").onclick = () => {
+    const hint = document.getElementById("hintBoxL5");
+    hint.style.display = (hint.style.display === "none") ? "block" : "none";
+  };
+}
+
+
+function renderL6(){
+  const tMax = truth.stableRange?.max;
+
+  gamePanel.innerHTML = `
+    <h2 class="cardTitle">Task</h2>
+    <div class="box">
+      <div class="tiny">
+        Determine the range of the gain <b>k</b> for which the closed-loop system is stable using the Routh–Hurwitz stability criterion.
+        <br/>
+        How to proceed:
+        <br/>- Write the characteristic equation of the closed-loop system.
+        <br/>- Construct the Routh table for the characteristic equation.
+        <br/>- Apply the stability condition: all elements of the first column of the Routh table must be positive.
+        <br/>- From these conditions, determine the range of <b>k</b> that ensures stability.
+        <br/>- Enter the stability range as an open interval <b>(kmin, kmax)</b>.
+        <br/>- If the system is stable for all <b>k &gt; 0</b>, you may write <b>kmax</b> = <b>inf</b>.
+        <br/>
+        <br/><b>Characteristic equation:</b>
+        <br/><b>${truth.charEqHtml || ""}</b>
+      </div>
+
+      <div class="row" style="margin-top:10px;">
+        <div>
+          <div class="tiny"><b>k min</b></div>
+          <input type="text" id="kmin" placeholder="e.g. 0" />
+        </div>
+        <div>
+          <div class="tiny"><b>k max</b></div>
+          <input type="text" id="kmax" placeholder="${(tMax===Infinity)?'inf':'e.g. 6'}" />
+        </div>
+      </div>
+
+      <div class="row" style="margin-top:10px; gap:8px; align-items:center;">
+        <button class="fit primary" id="btnCheckL6">Check</button>
+        <button class="fit" id="btnHintL6">Hint</button>
+      </div>
+      <div id="hintBoxL6" class="hint" style="display:none; margin-top:8px;">
+        If all first-column terms are positive for every k &gt; 0, the system is stable for all positive gains.
+      </div>
+    </div>
+  `;
+
+  document.getElementById("btnCheckL6").onclick = ()=>{
+    const a = parseMaybeNumber(document.getElementById("kmin").value);
+    const b = parseMaybeNumber(document.getElementById("kmax").value);
+
+    const targetMin = truth.stableRange.min;
+    const targetMax = truth.stableRange.max;
+
+    // If the theoretical lower bound is negative, many instructors still restrict k ≥ 0.
+    // So we accept either the exact theoretical bound OR 0 as the practical lower bound.
+    let okMin = false;
+    if (typeof a === "number" && Number.isFinite(a)) {
+      okMin = approxEqual(a, targetMin, 0.15);
+      if (!okMin && targetMin < 0) okMin = approxEqual(a, 0, 0.15);
+    }
+    let okMax = false;
+
+    if (targetMax===Infinity){
+      okMax = (b===Infinity || b===null); // allow blank OR inf
+    } else {
+      okMax = (typeof b==="number" && Number.isFinite(b) && approxEqual(b, targetMax, Math.max(0.2, 0.02*targetMax)));
+    }
+
+    gamePanel.querySelectorAll(".feedback").forEach(n=>n.remove());
+    if (okMin && okMax){
+      gamePanel.appendChild(setFeedback(`Correct!😄✅ Keep going—you're building the full root locus step by step.`, true));
+      unlock("L6");
+    } else {
+      gamePanel.appendChild(setFeedback(`❌ Not quite. Check your Routh table / coefficient conditions for this question.`, false));
+    }
+  };
+  document.getElementById("btnHintL6").onclick = () => {
+    const hint = document.getElementById("hintBoxL6");
+    hint.style.display = (hint.style.display === "none") ? "block" : "none";
+  };
+}
+
+
+function renderL7(){
+  const ic = truth.imagCross;
+
+  if (!ic){
+    gamePanel.innerHTML = `
+      <h2 class="cardTitle">Task</h2>
+      <div class="box">
+        <div class="tiny">
+          Imaginary-axis crossing happens when the system is marginally stable (a row of zeros in the Routh table).
+          <br/><b>For this question, there is no imaginary-axis crossing for k>0.</b>
+        </div>
+        <div class="row" style="margin-top:12px;">
+          <button class="fit primary" id="btnDoneL7">Done</button>
+          <button class="fit" id="btnHintL7">Hint</button>
+        </div>
+        <div id="hintBoxL7" class="hint" style="display:none; margin-top:8px;">
+          (When roots lie on the imaginary axis, the system is marginally stable, which is detected by a zero row in the Routh table.)
+        </div>
+      </div>
+    `;
+    document.getElementById("btnDoneL7").onclick = ()=>{
+      gamePanel.querySelectorAll(".feedback").forEach(n=>n.remove());
+      gamePanel.appendChild(setFeedback(`Correct!😄✅ Keep going—you're building the full root locus step by step.`, true));
+      unlock("L7");
+    };
+    return;
+  }
+
+    gamePanel.innerHTML = `
+    <h2 class="cardTitle">Task</h2>
+    <div class="box">
+      <div class="tiny">
+        Find the value of the gain <b>k</b> and the frequency <b>ω</b> at which the root locus crosses the imaginary axis (s = ± jω).
+        <br/>
+        How to proceed:
+        <br/>- Write the closed-loop characteristic equation.
+        <br/>- Construct the Routh table of the characteristic equation.
+        <br/>- Identify the row that becomes zero, which indicates imaginary-axis crossing.
+        <br/>- Form the auxiliary equation from the row above the zero row.
+        <br/>- Solve the auxiliary equation for <b>ω</b>.
+        <br/>- Substitute <b>ω</b> back to find the corresponding value of the gain <b>k</b>.
+        <br/>- Enter the value of <b>k</b> at crossing and the corresponding <b>ω</b> (rad/s).
+      </div>
+
+      <div class="row" style="margin-top:10px;">
+        <div>
+          <div class="tiny"><b>k at crossing</b></div>
+          <input type="text" id="kCross" placeholder="e.g. 6" />
+        </div>
+        <div>
+          <div class="tiny"><b>ω (rad/s)</b></div>
+          <input type="text" id="wCross" placeholder="e.g. 1.414" />
+        </div>
+      </div>
+        <div class="row" style="margin-top:10px; gap:8px; align-items:center;">
+          <button class="fit primary" id="btnCheckL7">Check</button>
+          <button class="fit" id="btnHintL7">Hint</button>
+        </div>
+        <div id="hintBoxL7" class="hint" style="display:none; margin-top:8px;">
+          (When roots lie on the imaginary axis, the system is marginally stable, which is detected by a zero row in the Routh table.)
+        </div>
+    </div>
+  `;
+
+  document.getElementById("btnCheckL7").onclick = ()=>{
+    const kIn = parseMaybeNumber(document.getElementById("kCross").value);
+    const wIn = parseMaybeNumber(document.getElementById("wCross").value);
+
+    const okK = (typeof kIn==="number" && Number.isFinite(kIn) && approxEqual(kIn, ic.k, Math.max(0.2, 0.03*ic.k)));
+    const okW = (typeof wIn==="number" && Number.isFinite(wIn) && approxEqual(wIn, ic.w, Math.max(0.05, 0.03*ic.w)));
+
+    gamePanel.querySelectorAll(".feedback").forEach(n=>n.remove());
+    if (okK && okW){
+      gamePanel.appendChild(setFeedback(`Correct!😄✅ Keep going—you're building the full root locus step by step.`, true));
+      unlock("L7");
+    } else {
+      gamePanel.appendChild(setFeedback(`❌ Not quite. Check the Routh row of zeros and the auxiliary equation.`, false));
+    }
+  };
+  // Attach hint toggle handler if present
+  const btnHint7 = document.getElementById("btnHintL7");
+  if (btnHint7){
+    btnHint7.onclick = () => {
+      const hint = document.getElementById("hintBoxL7");
+      if (hint) hint.style.display = (hint.style.display === "none") ? "block" : "none";
+    };
+  }
+}
+
+
+
+/* ---------- Refresh ---------- */
+function refreshAll(){
+  updateCheckboxesFromProgress();
+  renderLevelList();
+  renderScore();
+
+  // Ensure canvas panel is always visible
+  const canvasPanel = document.querySelector('.right > .panel');
+  if (canvasPanel) {
+    canvasPanel.style.display = 'block';
+    canvasPanel.style.visibility = 'visible';
+    canvasPanel.style.opacity = '1';
+  }
+
+  // Ensure currentLevelIndex is within bounds
+  if (currentLevelIndex >= levels.length) {
+    currentLevelIndex = levels.length - 1;
+  }
+  if (currentLevelIndex < 0) {
+    currentLevelIndex = 0;
+  }
+
+  const L = levels[currentLevelIndex];
+  if (L) {
+    lvlTitle.textContent = L.title;
+    lvlDesc.textContent = L.desc;
+    L.render();
+  } else {
+    console.warn('Level not found at index:', currentLevelIndex);
+  }
+
+  redraw();
+}
+
+/* ---------- Buttons ---------- */
+function resetProgress(askUser=true){
+  if (askUser){
+    if (!confirm("Reset all progress?")) return;
+  }
+  progress = {};
+  saveProgress(progress);
+  currentLevelIndex = 0;
+  refreshAll();
+}
+
+document.getElementById("btnReset").onclick = ()=>{ resetProgress(true); };
+
+
+Object.values(layers).forEach(chk=>{
+  // Allow manual toggling in Level 8
+  chk.addEventListener("click", (e) => {
+    const inLevel8 = currentLevelIndex === 7;
+    if (!inLevel8) {
+      e.preventDefault(); // Prevent manual toggling except in Level 8
+    } else {
+      redraw(); // Redraw when toggled in Level 8
+    }
+  });
+});
+
+
+// ===== Question switcher (display + reset) =====
+// ===== Question switcher (swap truth + update display + reset) =====
+window.RLQ_setQuestion = function(qid){
+  const q = questionBank[qid] || questionBank.Q1;
+  truth = q;
+
+  // Update the header transfer function and show it
+  const formulaDiv = document.querySelector('header .formula');
+  if (formulaDiv){
+    formulaDiv.innerHTML = `\\[${q.tfLatex}\\]`;
+    formulaDiv.style.display = 'block'; // Show the equation
+    if (window.MathJax && MathJax.typesetPromise) MathJax.typesetPromise([formulaDiv]);
+  }
+
+  // Mark that a question has been started (enables Level 1)
+  questionStarted = true;
+
+  // Show the game panel (task panel)
+  const gamePanel = document.getElementById('gamePanel');
+  if (gamePanel) {
+    gamePanel.style.display = 'block';
+  }
+
+  // Hide the Next Questions panel after selecting
+  const panel = document.getElementById('nextQuestionsPanel');
+  const pill = document.getElementById('nextQuestionsPill');
+  if (panel && pill) {
+    panel.style.display = 'none';
+    pill.style.display = 'block';
+  }
+
+  // Reset progress so the student can start fresh on this question (no confirm)
+  if (typeof resetProgress === "function") resetProgress(false);
+
+  // Jump to the top where the question is shown
+  window.scrollTo({top:0, behavior:'smooth'});
+};
+/* ---------- Init ---------- */
+refreshAll();
+</script>
+
+
+<!-- ===== Sticky Next Questions (added) ===== -->
+<div id="nextQuestionsPill" title="Show Next Questions">Next Questions</div>
+
+<aside id="nextQuestionsPanel" aria-label="Next Questions">
+  <div class="nqHeader">
+    <div class="title">Next Questions</div>
+    <button id="btnHideNextQ" type="button" aria-label="Hide next questions">×</button>
+  </div>
+  <div class="nqNote">These are visible all the time while solving.</div>
+
+  <div class="nqItem">
+    <div class="qLabel">Q1</div>
+    <div class="formula">\[
+      G(s)=\\frac{k}{s^3+3s^2+2s}
+    \]</div>
+    <button class="nqStart" type="button" data-q="Q1" style="margin-top:8px;">Start Q1 ▶</button>
+  </div>
+
+  <div class="nqItem">
+    <div class="qLabel">Q2</div>
+    <div class="formula">\[
+      G(s)=\\frac{k(s+4)}{s^2+4s+13}
+    \]</div>
+    <button class="nqStart" type="button" data-q="Q2" style="margin-top:8px;">Start Q2 ▶</button>
+  </div>
+
+  <div class="nqItem">
+    <div class="qLabel">Q3</div>
+    <div class="formula">\[
+      G(s)=\\frac{k(s+8)}{s^3+10s^2+57s+82}
+    \]</div>
+    <button class="nqStart" type="button" data-q="Q3" style="margin-top:8px;">Start Q3 ▶</button>
+  </div>
+
+  <div class="nqItem">
+    <div class="qLabel">Q4</div>
+    <div class="formula">\[
+      G(s)=\\frac{k(s+8)(s+12)}{s^3+10s^2+57s+82}
+    \]</div>
+    <button class="nqStart" type="button" data-q="Q4" style="margin-top:8px;">Start Q4 ▶</button>
+  </div>
+
+  <div class="nqItem" style="margin-bottom:0;">
+    <div class="qLabel">Q5</div>
+    <div class="formula">\[
+      G(s)=\\frac{k(s+8)(s+12)}{s^3+10s^2+57s+82}
+    \]</div>
+    <button class="nqStart" type="button" data-q="Q5" style="margin-top:8px;">Start Q5 ▶</button>
+  </div>  
+</aside>
+
+<script>
+(function(){
+  const panel = document.getElementById('nextQuestionsPanel');
+  const pill  = document.getElementById('nextQuestionsPill');
+  const hide  = document.getElementById('btnHideNextQ');
+  if (!panel || !pill || !hide) return;
+
+  // Start any next question inside the SAME website (no PDF open)
+  panel.addEventListener('click', (e)=>{
+    const btn = e.target.closest('.nqStart');
+    if (!btn) return;
+    const item = btn.closest('.nqItem');
+    const f = item ? item.querySelector('.formula') : null;
+    if (!f) return;
+    const qid = btn.getAttribute('data-q');
+    if (window.RLQ_setQuestion) window.RLQ_setQuestion(qid);
+  });
+
+
+  function showPanel(){
+    panel.style.display = 'block';
+    pill.style.display = 'none';
+    if (window.MathJax && MathJax.typesetPromise) MathJax.typesetPromise([formulaDiv]);
+  }
+  function hidePanel(){
+    panel.style.display = 'none';
+    pill.style.display = 'block';
+  }
+  hide.addEventListener('click', hidePanel);
+  pill.addEventListener('click', showPanel);
+})();
+</script>
+<!-- ===== End Sticky Next Questions ===== -->
+
+</body>
+</html>
