@@ -639,7 +639,7 @@ function closedLoopRoots(k){
 const questionBank = {
   Q1: {
     id:"Q1",
-    tfLatex: "G(s)=\\frac{k}{s^3+3s^2+2s}",
+    tfLatex: "G(s)=(k)/(s^3+3s^2+2s)",
     // (s)(s+1)(s+2)
     poles: [0, -1, -2],
     polesComplex: [],
@@ -664,7 +664,7 @@ const questionBank = {
 
   Q2: {
     id:"Q2",
-    tfLatex: "G(s)=\\frac{k(s+4)}{s^2+4s+13}",
+    tfLatex: "G(s)=(k(s+4))/(s^2+4s+13)",
     poles: [],                 // real-axis poles only (none)
     polesComplex: [ {re:-2, im:3}, {re:-2, im:-3} ],
     zeros: [-4],
@@ -686,7 +686,7 @@ const questionBank = {
 
   Q3: {
     id:"Q3",
-    tfLatex: "G(s)=\\frac{k(s+8)}{s^3+10s^2+57s+82}",
+    tfLatex: "G(s)=(k(s+8))/(s^3+10s^2+57s+82)",
     poles: [-2],
     polesComplex: [ {re:-4, im:5}, {re:-4, im:-5} ],
     zeros: [-8],
@@ -709,7 +709,7 @@ const questionBank = {
 
   Q4: {
     id:"Q4",
-    tfLatex: "G(s)=\\frac{k}{s^3+10s^2+57s+82}",
+    tfLatex: "G(s)=(k)/(s^3+10s^2+57s+82)",
     poles: [-2],
     polesComplex: [ {re:-4, im:5}, {re:-4, im:-5} ],
     zeros: [],
@@ -731,7 +731,7 @@ const questionBank = {
 
   Q5: {
     id:"Q5",
-    tfLatex: "G(s)=\\frac{k(s+8)(s+12)}{s^3+10s^2+57s+82}",
+    tfLatex: "G(s)=(k(s+8)(s+12))/(s^3+10s^2+57s+82)",
     poles: [-2],
     polesComplex: [ {re:-4, im:5}, {re:-4, im:-5} ],
     zeros: [-8, -12],
@@ -1954,7 +1954,7 @@ refreshAll();
   <div class="nqItem">
     <div class="qLabel">Q1</div>
     <div class="formula">\[
-      G(s)=\\frac{k}{s^3+3s^2+2s}
+      G(s)=(k)/(s^3+3s^2+2s)
     \]</div>
     <button class="nqStart" type="button" data-q="Q1" style="margin-top:8px;">Start Q1 ▶</button>
   </div>
@@ -1962,7 +1962,7 @@ refreshAll();
   <div class="nqItem">
     <div class="qLabel">Q2</div>
     <div class="formula">\[
-      G(s)=\\frac{k(s+4)}{s^2+4s+13}
+      G(s)=(k(s+4))/(s^2+4s+13)
     \]</div>
     <button class="nqStart" type="button" data-q="Q2" style="margin-top:8px;">Start Q2 ▶</button>
   </div>
@@ -1970,7 +1970,7 @@ refreshAll();
   <div class="nqItem">
     <div class="qLabel">Q3</div>
     <div class="formula">\[
-      G(s)=\\frac{k(s+8)}{s^3+10s^2+57s+82}
+      G(s)=(k(s+8))/(s^3+10s^2+57s+82)
     \]</div>
     <button class="nqStart" type="button" data-q="Q3" style="margin-top:8px;">Start Q3 ▶</button>
   </div>
@@ -1978,7 +1978,7 @@ refreshAll();
   <div class="nqItem">
     <div class="qLabel">Q4</div>
     <div class="formula">\[
-      G(s)=\\frac{k(s+8)(s+12)}{s^3+10s^2+57s+82}
+      G(s)=(k(s+8)(s+12))/(s^3+10s^2+57s+82)
     \]</div>
     <button class="nqStart" type="button" data-q="Q4" style="margin-top:8px;">Start Q4 ▶</button>
   </div>
@@ -1986,7 +1986,7 @@ refreshAll();
   <div class="nqItem" style="margin-bottom:0;">
     <div class="qLabel">Q5</div>
     <div class="formula">\[
-      G(s)=\\frac{k(s+8)(s+12)}{s^3+10s^2+57s+82}
+      G(s)=(k(s+8)(s+12))/(s^3+10s^2+57s+82)
     \]</div>
     <button class="nqStart" type="button" data-q="Q5" style="margin-top:8px;">Start Q5 ▶</button>
   </div>  
