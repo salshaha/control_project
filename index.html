@@ -65,8 +65,8 @@
     .wrap{
       display:grid;
       grid-template-columns: 320px 1fr;
-      gap:14px;
-      padding:14px;
+      gap:10px;
+      padding:10px;
       max-width:1600px;
       margin:0 auto;
     }
@@ -76,7 +76,7 @@
       border:3px solid var(--line);
       border-radius:16px;
       box-shadow: 6px 6px 0 rgba(0,0,0,0.18);
-      padding:14px;
+      padding:10px;
     }
 
     .left .panel{position:sticky; top:90px; height: calc(100vh - 110px); overflow:auto;}
@@ -84,8 +84,8 @@
     .levelList{
       display:flex;
       flex-direction:column;
-      gap:10px;
-      margin-top:10px;
+      gap:8px;
+      margin-top:8px;
     }
 
     .lvlBtn{
@@ -132,7 +132,7 @@
       flex-wrap:wrap;
       align-items:center;
       gap:10px;
-      margin-bottom:12px;
+      margin-bottom:8px;
     }
 
     .cardTitle{
@@ -203,7 +203,7 @@
 
     canvas{
       width:100%;
-      height:800px;
+      height:560px;
       border:3px solid var(--line);
       border-radius:16px;
       background:rgba(255,255,255,0.45);
@@ -250,7 +250,7 @@
       display:flex;
       align-items:center;
       gap:10px;
-      margin-top:10px;
+      margin-top:8px;
     }
     input[type="range"]{
       width:100%;
@@ -263,10 +263,14 @@
       line-height:1.4;
     }
 
+    #gamePanel{
+      margin-bottom:8px;
+    }
+
     @media (max-width: 980px){
       .wrap{grid-template-columns: 1fr}
       .left .panel{position:relative; top:auto; height:auto;}
-      canvas{height:600px;}
+      canvas{height:420px;}
     }
     .formula {
       background: rgba(255,255,255,0.7);
@@ -417,18 +421,10 @@
           <div class="cardTitle" id="lvlTitle">—</div>
           <div class="tiny" id="lvlDesc">—</div>
         </div>
-        <div class="box" style="min-width:260px;">
-          <div class="tiny"><b>Construction Progress</b> (Locked)</div>
-          <div class="checkGrid">
-            <!-- All unchecked by default, disabled so user can't toggle manually -->
-            <label class="chk"><input type="checkbox" id="layerPoles" disabled> <span>Poles/Zeros</span></label>
-            <label class="chk"><input type="checkbox" id="layerRealSeg" disabled> <span>Real-axis segments</span></label>
-            <label class="chk"><input type="checkbox" id="layerAsym" disabled> <span>Asymptotes</span></label>
-            <label class="chk"><input type="checkbox" id="layerBreak" disabled> <span>Breakaway</span></label>
-            <label class="chk"><input type="checkbox" id="layerCross" disabled> <span>Imag-axis crossing</span></label>
-            <label class="chk"><input type="checkbox" id="layerLocus" checked> <span>Root locus</span></label>
-          </div>
-        </div>
+      </div>
+
+      <div class="panel" id="gamePanel" style="display:none;">
+        <!-- dynamic content -->
       </div>
 
       <canvas id="plot" width="1100" height="560"></canvas>
@@ -442,10 +438,19 @@
       <div class="hint" id="plotHint">
         The graph will populate step-by-step as you solve the levels below.
       </div>
-    </div>
 
-    <div class="panel" id="gamePanel" style="display:none;">
-      <!-- dynamic content -->
+      <div class="box" style="margin-top:8px;">
+        <div class="tiny"><b>Construction Progress</b> (Locked)</div>
+        <div class="checkGrid">
+          <!-- All unchecked by default, disabled so user can't toggle manually -->
+          <label class="chk"><input type="checkbox" id="layerPoles" disabled> <span>Poles/Zeros</span></label>
+          <label class="chk"><input type="checkbox" id="layerRealSeg" disabled> <span>Real-axis segments</span></label>
+          <label class="chk"><input type="checkbox" id="layerAsym" disabled> <span>Asymptotes</span></label>
+          <label class="chk"><input type="checkbox" id="layerBreak" disabled> <span>Breakaway</span></label>
+          <label class="chk"><input type="checkbox" id="layerCross" disabled> <span>Imag-axis crossing</span></label>
+          <label class="chk"><input type="checkbox" id="layerLocus" checked> <span>Root locus</span></label>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -629,6 +634,11 @@ function closedLoopRoots(k){
     // s³ + (10+k)s² + (57+20k)s + (82+96k) = 0
     return cubicRootsMonic(10+k, 57+20*k, 82+96*k);
   }
+
+  else if (qid === 'Q6') {
+    // s³ + 3s² + 2s + k = 0 (same form as Q1)
+    return cubicRootsMonic(3, 2, k);
+  }
   
   // Default to Q1
   return cubicRootsMonic(3, 2, k);
@@ -751,6 +761,29 @@ const questionBank = {
     stableRange: {min:-0.854, max:Infinity, open:true},
     charEqHtml: "s³ + (10+k)s² + (57+20k)s + (82+96k) = 0",
     imagCross: null
+  },
+  Q6: {
+    id:"Q6",
+    tfLatex: "G(s)H(s)=\\frac{K}{s(s+1)(s+2)}",
+    poles: [0, -1, -2],
+    polesComplex: [],
+    zeros: [],
+    zerosComplex: [],
+    poleText: "0, -5, -7",
+    zeroText: "none",
+    realSegments: [
+      { name: "(-\\infty,-2)", ok: true },
+      { name: "(-2,-1)", ok: false },
+      { name: "(-1,0)", ok: true },
+      { name: "(0,\\infty)", ok: false }
+    ],
+    asymCount: 3,
+    centroid: -1,
+    asymAngles: [60, 180, -60],
+    breakawayValid: -0.42265,
+    stableRange: {min:0, max:6, open:true},
+    charEqHtml: "s³ + 3s² + 2s + K = 0",
+    imagCross: {k:6, w:Math.sqrt(2)}
   },
 };
 
@@ -1001,9 +1034,10 @@ function drawAsymptotes(){
   
   ctx.setLineDash([12,12]);
 
+ 
   angles.forEach(th=>{
     const dx = Math.cos(th), dy = Math.sin(th);
-    const len = isQ4 ? 8 : 20; // Shorter asymptotes for Q4
+    const len = isQ4 ? 8 : 5; // Shorter asymptotes for Q4
     const x1 = c - dx*len, y1 = 0 - dy*len;
     const x2 = c + dx*len, y2 = 0 + dy*len;
     ctx.beginPath();
@@ -1048,10 +1082,13 @@ function sortRootsStable(roots){
 
 function drawLocus(){
   let KMAX = 20;
+  if (truth.id === "Q1") KMAX = 60; 
+  if (truth.id === "Q6") KMAX = 60; 
   if (truth.id === "Q2") KMAX = 200;
   if (truth.id === "Q3") KMAX = 200;
   if (truth.id === "Q4") KMAX = 500;
   if (truth.id === "Q5") KMAX = 100;
+
   const steps = 1000;  // Increased from 500 for smoother curves
 
   // Get initial roots at k=0.001 (avoid k=0 which may have poles)
@@ -1155,6 +1192,7 @@ function redraw(){
     Q3: {xmin:-9, xmax:1, ymin:-13, ymax:13},
     Q4: {xmin:-14, xmax:1, ymin:-8, ymax:8},
     Q5: {xmin:-35, xmax:3, ymin:-18, ymax:18},
+    Q6: {xmin:-2.5, xmax:1, ymin:-6, ymax:6},
   };
   
   const config = viewConfigs[truth.id] || {xmin:-2.5, xmax:1, ymin:-6, ymax:6};
@@ -1481,7 +1519,7 @@ function renderL3(){
       <div class="row" style="margin-top:10px;">
         <div>
           <div class="tiny"><b># asymptotes</b></div>
-          <input type="number" id="asymCount" placeholder="e.g. 1" />
+          <input type="number" id="asymCount" placeholder="e.g. 6" />
         </div>
         <div>
           <div class="tiny"><b>Centroid σA</b></div>
@@ -1636,7 +1674,7 @@ function renderL5(){
 
       <div style="margin-top:10px;">
         <div class="tiny"><b>Enter the valid value</b> (approx)</div>
-        <input type="text" id="brVal" placeholder="e.g. -0.423" />
+        <input type="text" id="brVal" placeholder="e.g. -1.234" />
       </div>
 
       <div class="row" style="margin-top:10px; gap:8px; align-items:center;">
@@ -1692,11 +1730,11 @@ function renderL6(){
       <div class="row" style="margin-top:10px;">
         <div>
           <div class="tiny"><b>k min</b></div>
-          <input type="text" id="kmin" placeholder="e.g. 0" />
+          <input type="text" id="kmin" placeholder="e.g. 1" />
         </div>
         <div>
           <div class="tiny"><b>k max</b></div>
-          <input type="text" id="kmax" placeholder="${(tMax===Infinity)?'inf':'e.g. 6'}" />
+          <input type="text" id="kmax" placeholder="${(tMax===Infinity)?'inf':'e.g. 8'}" />
         </div>
       </div>
 
@@ -1794,11 +1832,11 @@ function renderL7(){
       <div class="row" style="margin-top:10px;">
         <div>
           <div class="tiny"><b>k at crossing</b></div>
-          <input type="text" id="kCross" placeholder="e.g. 6" />
+          <input type="text" id="kCross" placeholder="e.g. 3" />
         </div>
         <div>
           <div class="tiny"><b>ω (rad/s)</b></div>
-          <input type="text" id="wCross" placeholder="e.g. 1.414" />
+          <input type="text" id="wCross" placeholder="e.g. 2.6" />
         </div>
       </div>
         <div class="row" style="margin-top:10px; gap:8px; align-items:center;">
@@ -1990,6 +2028,14 @@ refreshAll();
     \]</div>
     <button class="nqStart" type="button" data-q="Q5" style="margin-top:8px;">Start Q5 ▶</button>
   </div>  
+  
+  <div class="nqItem" style="margin-bottom:0;">
+    <div class="qLabel">Q6</div>
+    <div class="formula">\[
+      G(s)H(s)=\frac{K}{s(s+1)(s+2)}
+    \]</div>
+    <button class="nqStart" type="button" data-q="Q6" style="margin-top:8px;">Start Q6 ▶</button>
+  </div>
 </aside>
 
 <script>
